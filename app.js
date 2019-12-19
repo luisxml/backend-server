@@ -1,9 +1,22 @@
+'use strict'
+
 // Requires
 var express = require('express');
 var mongoose = require('mongoose');
+var bodyParser = require('body-parser');
 
 // Inicialixar variables
 var app = express();
+
+// Body Parser
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false}));
+app.use(bodyParser.json());
+
+// Importar Rutas
+var appRoutes = require('./routes/app');
+var userRoutes = require('./routes/user');
+var loginRoutes = require('./routes/login');
 
 // Conexion a la base de datos
 mongoose.connection.openUri('mongodb://localhost:27017/hospitalDB', (err, res) => {
@@ -14,14 +27,10 @@ mongoose.connection.openUri('mongodb://localhost:27017/hospitalDB', (err, res) =
 });
 
 // Rutas
-app.get('/', (req, res, next ) => {
+app.use('/api', appRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/login', loginRoutes);
 
-    res.status(200).send({
-       ok: true,
-       message: 'Petición al servidor realizada correctamente.'
-    })
-
-});
 
 // Escuchar peticiones
 app.listen(3000, () => {
