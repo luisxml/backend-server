@@ -17,6 +17,11 @@ app.use(bodyParser.json());
 var appRoutes = require('./routes/app');
 var userRoutes = require('./routes/user');
 var loginRoutes = require('./routes/login');
+var hospitalRoutes = require('./routes/hospital');
+var doctorRoutes = require('./routes/doctor');
+var searchRoutes = require('./routes/search');
+var uploadhRoutes = require('./routes/upload');
+var imageRoutes = require('./routes/image');
 
 // Conexion a la base de datos
 mongoose.connection.openUri('mongodb://localhost:27017/hospitalDB', (err, res) => {
@@ -26,10 +31,20 @@ mongoose.connection.openUri('mongodb://localhost:27017/hospitalDB', (err, res) =
 
 });
 
+// Server Index Config
+// var serverIndex = require('serve-index');
+// app.use(express.static(__dirname + '/'));
+// app.use('/uploads', serverIndex(__dirname + '/uploads'));
+
 // Rutas
-app.use('/api', appRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/login', loginRoutes);
+app.use('/api/hospital', hospitalRoutes);
+app.use('/api/doctor', doctorRoutes);
+app.use('/api/search', searchRoutes);
+app.use('/api/upload', uploadhRoutes);
+app.use('/api/image', imageRoutes);
+app.use('/api', appRoutes);
 
 
 // Escuchar peticiones

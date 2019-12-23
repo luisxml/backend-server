@@ -1,6 +1,7 @@
 'use strict'
 
 var express = require('express');
+var mongoosePaginate = require('mongoose-pagination');
 
 // bcryptjs
 var bcrypt = require('bcryptjs');
@@ -23,10 +24,52 @@ var User = require('../models/user');
 //     })
 // });
 
-// Get users
+
+// Get users paginacion 1
+// app.get('/:page', (req, res, next ) => {
+//     //User.find({role: 'ROLE_ADMIN'}).exec((err, users) => {    
+
+//    if(req.params.page){
+//     var page = req.params.page;
+//     }else{
+//         var page = 1;
+//     }
+
+//     var itemsPerPage = 3;
+    
+//     User.find({}, 'name email image role').paginate(page, itemsPerPage, (err, users, total) => {
+//         if (err) {
+//             return res.status(500).send({
+//                 ok: false,
+//                 message: 'Error en la Petición.',
+//                 error: err
+//              });
+//         } else {            
+//             if (users.length <=0) {
+//                 return res.status(404).send({
+//                     ok: false,
+//                     message: 'No hay usuarios Registrados.'
+//                  });
+//             } else{
+//                 res.status(200).send({
+//                     ok: true,
+//                     total_items: total,
+//                     users: users
+//                  });
+//             }
+            
+//         }
+//     });    
+// });
+
+// Get users paginacion 2
 app.get('/', (req, res, next ) => {
     //User.find({role: 'ROLE_ADMIN'}).exec((err, users) => {
-    User.find({}, 'name email image role').exec((err, users) => {
+    
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
+    User.find({}, 'name email image role').skip(desde).limit(5).exec((err, users) => {    
         if (err) {
             return res.status(500).send({
                 ok: false,
@@ -34,16 +77,21 @@ app.get('/', (req, res, next ) => {
                 error: err
              });
         } else {            
-            if (!users) {
+            if (users.length <=0) {
                 return res.status(404).send({
                     ok: false,
                     message: 'No hay usuarios Registrados.'
                  });
             } else{
-                res.status(200).send({
-                    ok: true,
-                    users: users
-                 });
+
+                User.count({}, (err, totalUsers) => {
+                    res.status(200).send({
+                        ok: true,  
+                        totalUsers: totalUsers,                  
+                        users: users
+                        
+                     });
+                });               
             }
             
         }
@@ -85,8 +133,6 @@ app.post('/', (req, res) => {
         }
     });    
 });
-
-
 
 // Update User
 app.put('/:id', mdAuthenticattion.verificarToken, (req, res) => {
@@ -161,7 +207,5 @@ app.delete('/:id', mdAuthenticattion.verificarToken, (req, res) => {
 
     });
 });
-
-
 
 module.exports = app;
