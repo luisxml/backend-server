@@ -8,9 +8,6 @@ var bodyParser = require('body-parser');
 //mssql
 var mssql = require('mssql');
 
-// TEDIUS
-//var Connection = require('tedious').Connection;
-
 // Inicialixar variables
 var app = express();
 
@@ -50,7 +47,7 @@ var searchRoutes = require('./routes/search');
 var uploadhRoutes = require('./routes/upload');
 var imageRoutes = require('./routes/image');
 
-// // Conexion a la base de datos MONGO DB
+// Conexion a la base de datos MONGO DB
 // mongoose.connection.openUri('mongodb://localhost:27017/hospitalDB', (err, res) => {
     
 //     if(err) throw err;
@@ -58,11 +55,11 @@ var imageRoutes = require('./routes/image');
 
 // });
 
-// // Conexion a la base de datos MSSQL SERVER
-// app.set('view engine', 'ejs');
+// Conexion a la base de datos MSSQL SERVER
+app.set('view engine', 'ejs');
 
-// // PUERTO
- var port = process.env.PORT || 5000;
+// PUERTO
+var port = process.env.PORT || 5000;
 
 // VARIABLES DE CONEXION
 var config = {
@@ -70,7 +67,7 @@ var config = {
     password: 'Cybers@c1',
     server: '192.168.0.3',
     //port:
-    database: 'SERVAL_APP'
+    database: 'SERVAL_CYBER'
 };
 
 
@@ -81,42 +78,10 @@ var connection = mssql.connect(config, function(err, res){
     } else {
         console.log("conectado");
         app.listen(port, function(){
-            console.log('api rest run en http://localhost:' + port);
+            console.log('api rest run en http://localhost' + port);
         });
     }
 });
-
-
-// //CONEXION SQL SERVER CON TEDIOUS
-// var config = { 
-//     server: '192.168.0.3',
-//     authentication: { 
-//         type: 'default', 
-//         options: { 
-//             userName: 'serval', 
-//             password: 'Cybers@c1',
-//             database: 'serval_cyber' 
-//         } 
-//     }, 
-//     options: {
-//         encrypt:false 
-//     } 
-// }
-
-
-// var connection = new Connection(config);  
-// connection.on('connect', function(err) {  
-//     // If no error, then good to proceed.
-//     if (err){
-//         throw err;
-//     } else {
-//         console.log("Connected");  
-//         app.listen(port, function(){
-//              console.log('api rest run en http://localhost:' + port);
-//         });
-//         //executeStatement();  
-//     }    
-// });  
 
 
 

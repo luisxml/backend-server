@@ -37,7 +37,7 @@ var User = require('../models/user');
 
 //     var itemsPerPage = 3;
     
-//     User.find({}, 'name email image role').paginate(page, itemsPerPage, (err, users, total) => {
+//     User.find({}, 'name email image role google').paginate(page, itemsPerPage, (err, users, total) => {
 //         if (err) {
 //             return res.status(500).send({
 //                 ok: false,
@@ -56,8 +56,7 @@ var User = require('../models/user');
 //                     total_items: total,
 //                     users: users
 //                  });
-//             }
-            
+//             }            
 //         }
 //     });    
 // });
@@ -69,7 +68,7 @@ app.get('/', (req, res, next ) => {
     var desde = req.query.desde || 0;
     desde = Number(desde);
 
-    User.find({}, 'name email image role').skip(desde).limit(5).exec((err, users) => {    
+    User.find({}, 'name email image role google').skip(desde).limit(5).exec((err, users) => {    
         if (err) {
             return res.status(500).send({
                 ok: false,
@@ -135,7 +134,7 @@ app.post('/', (req, res) => {
 });
 
 // Update User
-app.put('/:id', mdAuthenticattion.verificarToken, (req, res) => {
+app.put('/:id', [mdAuthenticattion.verificarToken, mdAuthenticattion.verificarUser], (req, res) => {
     var id = req.params.id;
     var body = req.body;
 
@@ -180,7 +179,7 @@ app.put('/:id', mdAuthenticattion.verificarToken, (req, res) => {
 });
 
 // Delete user
-app.delete('/:id', mdAuthenticattion.verificarToken, (req, res) => {
+app.delete('/:id', [mdAuthenticattion.verificarToken, mdAuthenticattion.verificarRoleUser], (req, res) => {
     var id = req.params.id;
 
     User.findByIdAndRemove(id, (err, userDelete) => {

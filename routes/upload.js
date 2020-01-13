@@ -113,7 +113,7 @@ function subirArchivo(tipo, id, fileName, res){
                                 res.status(200).send({
                                     ok: true,
                                     message: 'Archivo Guardado Correctamente.',
-                                    usuario: userUpdate
+                                    user: userUpdate
                                 });
                             }
                         });

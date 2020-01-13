@@ -13,6 +13,13 @@ app.get('/:all/:search', (req, res, next ) => {
     var search = req.params.search;
     var regex = new RegExp(search, 'i');
 
+    // if (search.length <= 0) {
+    //     return res.status(200).send({
+    //         ok: true,
+    //         message: 'Debe establecer un patron de busqueda';           
+    //      });
+    // }
+    
     Promise.all([
         searchHospitals(search, regex),
         searchDoctors(search, regex),
@@ -136,7 +143,7 @@ function searchUser(search, regex){
 
     return new Promise( (resolve, reject) => {
 
-        User.find({}, 'name email role')
+        User.find({}, 'name email role image')
             .or([{'name': regex}, {'email': regex}])
             .exec( (err, users) => {
                 if(err) {

@@ -12,6 +12,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
+    "ejs": "^3.0.1",
     "express": "^4.17.1",
     "express-fileupload": "^1.1.6",
     "google-auth-library": "^5.7.0",
@@ -21,7 +22,9 @@
     "mongoose": "^5.8.1",
     "mongoose-pagination": "^1.0.0",
     "mongoose-unique-validator": "^2.0.3",
-    "serve-index": "^1.9.1"
+    "mssql": "^6.0.1",
+    "serve-index": "^1.9.1",
+    "tedious": "^6.6.5"
   },
   "devDependencies": {
     "nodemon": "^2.0.2"

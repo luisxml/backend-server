@@ -15,10 +15,25 @@ var app = express();
 
 var User = require('../models/user');
 
+var mdAuthenticattion = require('../middlewares/authenticated');
+
 //Google
 var CLIENT_ID = require('../config/config').CLIENT_ID;
 const {OAuth2Client} = require('google-auth-library');
 const client = new OAuth2Client(CLIENT_ID);
+
+// Renovar Token
+app.get('/renewtoken',mdAuthenticattion.verificarToken, (req, res) => {
+
+    var token = jwt.sign({user: req.user}, SEED, {expiresIn: 14400}) // expira en 4 horas
+    
+    return res.status(200).send({
+        ok: true,
+        mensaje: 'New Token!!',       
+        token: token
+    });   
+    
+});
 
 // Autenticacion de Google
 async function verify(token) {
@@ -43,16 +58,37 @@ async function verify(token) {
 }
 
 app.post('/google', async (req, res) => {
-
-    var token = req.body.token;
-
+    
+    var token = req.body.token || '';
+    
     var googleUser = await verify(token)
-        .catch(e => {
-            res.status(403).send({
-                ok: false,
-                message: 'Token no Valido'       
-            }); 
-        });
+    .catch(e => {
+        return res.status(403).send({
+            ok: false,             
+            message: 'Token no Valido',
+            token: token,
+            error: error.message                          
+        }); 
+    });
+
+    // var token = req.body.token || '';
+    // var googleUser;
+    // try {
+    //     googleUser = await verify(token);
+    // } catch (error) {
+    //     return res.status(403).send({
+    //         ok: false,
+    //         mensaje: 'Token no válida',
+    //         error: error.message
+    //     });
+    // }
+    // return res.status(200).send({
+    //     ok: true,
+    //     mensaje: 'todo Ok!!',
+    //     googleUser
+    // });   
+
+    
     
     User.findOne({email: googleUser.payload.email}, (err, UserDB) => {
         if (err) {
@@ -76,7 +112,8 @@ app.post('/google', async (req, res) => {
                         message: 'Login Correcto.',
                         user: UserDB,
                         id: UserDB._id,
-                        token: token
+                        token: token,
+                        menu: menu(UserDB.role)
                     }); 
                 }
             } else {                
@@ -105,7 +142,9 @@ app.post('/google', async (req, res) => {
                             message: 'Login Correcto.',
                             user: UserDB,
                             id: UserDB._id,
-                            token: token
+                            token: token,
+                            menu: menu(UserDB.role)
+
                         }); 
                     }
                 });
@@ -113,10 +152,10 @@ app.post('/google', async (req, res) => {
         }
     });
 
-    // res.status(200).send({
+    // return res.status(200).send({
     //     ok: true,
     //     message: 'Login Correcto.',
-    //     googleUser: googleUser.payload
+    //     token: token
     // }); 
 });
 
@@ -137,7 +176,7 @@ app.post('/', (req, res) => {
             if (!userLogin) {
                 return res.status(404).send({
                     ok: false,
-                    message: 'Email o Password Incorrecto. - email',
+                    message: 'Email o Password Incorrecto.',
                     error: err
                 }); 
             } else {
@@ -145,7 +184,7 @@ app.post('/', (req, res) => {
                 if (!bcrypt.compareSync(body.password, userLogin.password)){
                     return res.status(404).send({
                         ok: false,
-                        message: 'Email o Password Incorrecto. - password',
+                        message: 'Email o Password Incorrecto.',
                         error: err
                     }); 
                 } else {
@@ -158,7 +197,8 @@ app.post('/', (req, res) => {
                         message: 'Login Correcto.',
                         user: userLogin,
                         id: userLogin._id,
-                        token: token
+                        token: token,
+                        menu: menu(userLogin.role)
                     }); 
                 }
                 
@@ -166,5 +206,35 @@ app.post('/', (req, res) => {
         }
     });    
 });
+
+//Obtener MENU
+function menu(ROLE) {
+
+    var menu = [{
+        titulo: 'Principal',
+        icono: 'mdi mdi-gauge',
+        submenu: [
+          { titulo: 'Dashboard', url: '/dashboard'},
+          { titulo: 'PogressBar', url: '/progress'},
+          { titulo: 'Graficas', url: '/graphics1'},
+          { titulo: 'Promesas', url: '/promesas'}
+        ]
+      },
+      {
+        titulo: 'Mantenimiento',
+        icono: 'mdi mdi-folder-lock-open',
+        submenu: [
+          // {titulo: 'Usuarios', url: '/users'},
+          {titulo: 'Hopitales', url: '/hospitals'},
+          {titulo: 'Medicos', url: '/doctors'}
+        ]
+      }
+      ];
+      console.log(ROLE);
+      if (ROLE === 'ADMIN_ROLE') {
+          menu[1].submenu.unshift({titulo: 'Usuarios', url: '/users'})
+      }
+    return menu;
+}
 
 module.exports = app;

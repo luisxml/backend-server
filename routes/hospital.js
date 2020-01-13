@@ -18,19 +18,51 @@ var Hospital = require('../models/hospital');
 // });
 
 
-// Get Hospitals
-app.get('/:page', (req, res, next ) => {
-    //User.find({role: 'ROLE_ADMIN'}).exec((err, users) => {    
-    if(req.params.page){
-         var page = req.params.page;
-    }else{
-        var page = 1;
-    }
+// Get Hospitals 1
+// app.get('/:page', (req, res, next ) => {
+//     //User.find({role: 'ROLE_ADMIN'}).exec((err, users) => {    
+//     if(req.params.page){
+//          var page = req.params.page;
+//     }else{
+//         var page = 5;
+//     }
         
-    var itemsPerPage = 3;
+//     var itemsPerPage = 3;
             
-    Hospital.find({}).populate('user', 'name email').paginate(page, itemsPerPage, (err, hospitals, total) => { 
-    //Hospital.find({}).populate( 'user', 'name email').exec((err, hospitals) => {
+//     Hospital.find({}).populate('user', 'name email').paginate(page, itemsPerPage, (err, hospitals, total) => { 
+//     //Hospital.find({}).populate( 'user', 'name email').exec((err, hospitals) => {
+//         if (err) {
+//             return res.status(500).send({
+//                 ok: false,
+//                 message: 'Error en la Petición.',
+//                 error: err
+//              });
+//         } else {            
+//             if (hospitals.length <=0) {
+//                 return res.status(404).send({
+//                     ok: false,
+//                     message: 'No hay Hospitales Registrados.'
+//                  });
+//             } else{
+//                 res.status(200).send({
+//                     ok: true,
+//                     total: total,
+//                     hospitals: hospitals
+//                  });
+//             }
+            
+//         }
+//     });    
+// });
+
+// Get Hospitals 2
+app.get('/', (req, res, next ) => {
+    //User.find({role: 'ROLE_ADMIN'}).exec((err, users) => {
+    
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
+    Hospital.find({}, 'name image').skip(desde).limit(5).exec((err, hospitals) => {    
         if (err) {
             return res.status(500).send({
                 ok: false,
@@ -41,14 +73,87 @@ app.get('/:page', (req, res, next ) => {
             if (hospitals.length <=0) {
                 return res.status(404).send({
                     ok: false,
-                    message: 'No hay Hospitales Registrados.'
+                    message: 'No hay usuarios Registrados.'
                  });
             } else{
-                res.status(200).send({
-                    ok: true,
-                    total: total,
-                    hospitals: hospitals
+
+                Hospital.count({}, (err, totalHospitals) => {
+                    res.status(200).send({
+                        ok: true,  
+                        totalHospitals: totalHospitals,                  
+                        hospitals: hospitals
+                        
+                     });
+                });               
+            }
+            
+        }
+    });    
+});
+
+// Get Hospitals 3
+app.get('/gets', (req, res, next ) => {
+    //User.find({role: 'ROLE_ADMIN'}).exec((err, users) => {
+    
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
+    Hospital.find({}, 'name image').skip(desde).exec((err, hospitals) => {    
+        if (err) {
+            return res.status(500).send({
+                ok: false,
+                message: 'Error en la Petición.',
+                error: err
+             });
+        } else {            
+            if (hospitals.length <=0) {
+                return res.status(404).send({
+                    ok: false,
+                    message: 'No hay usuarios Registrados.'
                  });
+            } else{
+
+                Hospital.count({}, (err, totalHospitals) => {
+                    res.status(200).send({
+                        ok: true,  
+                        totalHospitals: totalHospitals,                  
+                        hospitals: hospitals
+                        
+                     });
+                });               
+            }
+            
+        }
+    });    
+});
+
+
+// Get Hospital 
+app.get('/:id', (req, res, next ) => {
+    //User.find({role: 'ROLE_ADMIN'}).exec((err, users) => {
+    var id = req.params.id;
+ 
+    Hospital.findById(id).populate('user', 'name email image').exec((err, hospital) => {    
+        if (err) {
+            return res.status(500).send({
+                ok: false,
+                message: 'Error en la Petición.',
+                error: err
+             });
+        } else {            
+           // if (hospital.length <=0) {
+            if (!hospital) {
+                return res.status(404).send({
+                    ok: false,
+                    message: 'No existe el hospital.'
+                 });
+            } else{
+
+                res.status(200).send({
+                ok: true,                            
+                hospital: hospital                        
+                     
+                });               
             }
             
         }
@@ -110,7 +215,7 @@ app.put('/:id', mdAuthenticattion.verificarToken, (req, res) => {
                 });
             } else {
                 hospital.name = body.name;
-                hospital.image = null;
+                //hospital.image = body.image;
                 //hospital.user = body.role;
 
                 hospital.save((err, hospitalUpdate) => {
