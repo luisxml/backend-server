@@ -1,7 +1,7 @@
 'use strict'
 
 var express = require('express');
-var mongoosePaginate = require('mongoose-pagination');
+//var mongoosePaginate = require('mongoose-pagination');
 
 // bcryptjs
 var bcrypt = require('bcryptjs');
@@ -9,11 +9,24 @@ var bcrypt = require('bcryptjs');
 // jwt
 var jwt = require('jsonwebtoken');
 
-var mdAuthenticattion = require('../middlewares/authenticated');
+
+// mssql
+var mssql = require('mssql');
+var bodyParser = require('body-parser');
+var http = require('http');
+var path = require('path');
+
 
 var app = express();
 
-var User = require('../models/user');
+app.use(bodyParser.urlencoded({ extended: false}));
+app.use(bodyParser.json());
+
+var mdAuthenticattion = require('../middlewares/authenticated');
+
+
+
+//var User = require('../models/user');
 
 // // Prueba de ruta de user
 // app.get('/', (req, res, next ) => {
@@ -25,6 +38,7 @@ var User = require('../models/user');
 // });
 
 
+<<<<<<< HEAD
 // Get users paginacion 1
 // app.get('/:page', (req, res, next ) => {
 //     //User.find({role: 'ROLE_ADMIN'}).exec((err, users) => {    
@@ -60,150 +74,183 @@ var User = require('../models/user');
 //         }
 //     });    
 // });
-
-// Get users paginacion 2
-app.get('/', (req, res, next ) => {
-    //User.find({role: 'ROLE_ADMIN'}).exec((err, users) => {
-    
-    var desde = req.query.desde || 0;
-    desde = Number(desde);
-
-    User.find({}, 'name email image role google').skip(desde).limit(5).exec((err, users) => {    
-        if (err) {
-            return res.status(500).send({
-                ok: false,
-                message: 'Error en la Petición.',
-                error: err
-             });
-        } else {            
-            if (users.length <=0) {
-                return res.status(404).send({
-                    ok: false,
-                    message: 'No hay usuarios Registrados.'
-                 });
-            } else{
-
-                User.count({}, (err, totalUsers) => {
-                    res.status(200).send({
-                        ok: true,  
-                        totalUsers: totalUsers,                  
-                        users: users
-                        
-                     });
-                });               
-            }
-            
-        }
-    });    
-});
-
+=======
 // Register User
 app.post('/', (req, res) => {
+>>>>>>> 661bc162e9731e37e606fb54686b24ec2c48ccbb
 
     var body = req.body;
-    var user = new User({
-        name:  body.name,
-        email: body.email,
-        password: bcrypt.hashSync(body.password, 10),
-        image: body.image,
-        role: body.role
-    });
+    var name = body.name;    
+    var email = body.email;
+    var password = bcrypt.hashSync(body.password, 10);
 
-    user.save((err, userRegister) => {
+    var params = `'${name}', '${email}', '${password}'`;   
+    var request = new mssql.Request();
+    var lsql = `EXEC REGISTER_USER ${params}`  
+
+<<<<<<< HEAD
+    User.find({}, 'name email image role google').skip(desde).limit(5).exec((err, users) => {    
         if (err) {
-            return res.status(500).send({
-                ok: false,
-                message: 'Error en la Petición.',
-                error: err
-            });
-        } else {            
-            if (!userRegister) {
-                return res.status(404).send({
-                    ok: false,
-                    message: 'No se Registro el usurario.'
-                });
-            } else {
-                res.status(201).send({
-                    ok: true,
-                    message: 'Usuario Registrado Correctamente.',
-                    user: userRegister
-                });
-            }        
-        }
-    });    
-});
-
-// Update User
-app.put('/:id', [mdAuthenticattion.verificarToken, mdAuthenticattion.verificarUser], (req, res) => {
-    var id = req.params.id;
-    var body = req.body;
-
-    User.findById(id, (err, user) => {
-        if (err) {
+=======
+    request.query(lsql, (err, result) => {
+        if (err) { 
+>>>>>>> 661bc162e9731e37e606fb54686b24ec2c48ccbb
             return res.status(500).send({
                 ok: false,
                 message: 'Error en la petición.',
                 error: err
             });
-        } else {
-            if (!user) {
-                return res.status(404).send({
-                    ok: false,
+        } else {            
+            var userRegister = result.recordset;
+            var ID_USER = userRegister[0].ID_USER;
+            
+            if (ID_USER === 0) {
+                return  res.status(400).send({
+                    ok: false, 
+                    message: userRegister[0].MESSAGE                                  
+                }); 
+            } else {
+                return res.status(200).send({
+                    ok: true, 
+                    message: userRegister[0].MESSAGE,                  
+                    userRegister: userRegister                                   
+                });  
+            }
+        }
+    });
+});
+
+// GET USERS
+app.get('/', (req, res, next ) => {
+
+    var lsql = `EXEC GET_USERS`   
+    var request = new mssql.Request();
+
+    request.query(lsql, (err, result) => {
+        if (err) { 
+            return res.status(500).send({
+                ok: false,
+                message: 'Error en la petición.',
+                error: err
+            });
+        } else {            
+            var users = result.recordset;            
+            return res.status(200).send({
+                ok: true,                             
+                users: users                                   
+            });
+        }
+    });
+});
+
+// GET USER
+app.get('/:id', (req, res, next ) => {
+
+    var id = req.params.id;
+
+    var params = `${id}`;  
+    var lsql = `EXEC GET_USER ${params}`    
+
+    var request = new mssql.Request();
+    request.query(lsql, (err, result) => {
+        if (err) { 
+            return res.status(500).send({
+                ok: false,
+                message: 'Error en la petición.',
+                error: err
+            });
+        } else {   
+            
+            var userUpdate = result.recordset;
+            var ID_USER = userUpdate[0].ID_USER;
+            
+            if (ID_USER === 0) {
+                return  res.status(400).send({
+                    ok: false, 
+                    message: userRegister[0].MESSAGE
+                }); 
+            } else {
+                return res.status(200).send({
+                    ok: true, 
+                    message: userUpdate[0].MESSAGE,                  
+                    userUpdate: userUpdate                                   
+                });  
+            }
+        }
+    });
+});
+
+<<<<<<< HEAD
+// Update User
+app.put('/:id', [mdAuthenticattion.verificarToken, mdAuthenticattion.verificarUser], (req, res) => {
+=======
+// UPDATE USER
+app.put('/:id', (req, res, next ) => {
+
+>>>>>>> 661bc162e9731e37e606fb54686b24ec2c48ccbb
+    var id = req.params.id;
+    var body = req.body;
+    var name = body.name;    
+    var email = body.email;    
+
+    var params = `${id}, '${name}', '${email}'`;   
+    var request = new mssql.Request();
+    var lsql = `EXEC UPDATE_USER ${params}`  
+
+    var request = new mssql.Request();
+    request.query(lsql, (err, result) => {
+        if (err) { 
+            return res.status(500).send({
+                ok: false,
+                message: 'Error en la petición.',
+                error: err
+            });
+        } else {   
+            var userUpdated = result.recordset;
+            if (userUpdated.length === 0) {
+                return res.status(200).send({
+                    ok: true,
                     message: 'Usuario no registrado.'
                 });
             } else {
-                user.name = body.name;
-                user.email = body.email;
-                user.role = body.role;
-
-                user.save((err, userUpdate) => {
-                    if (err) {
-                        return res.status(400).send({
-                            ok: false,
-                            message: 'Error al actualizar el usuario.',
-                            error: err
-                        });
-                    } else {
-                        userUpdate.password = null;
-                        res.status(200).send({
-                            ok: true,
-                            message: 'Usuario Actualizado Correctamente.',
-                            user: userUpdate,                            
-                            userToken: req.user
-                        });
-                    }
+                return res.status(200).send({
+                    ok: true,                             
+                    userUpdated: userUpdated
                 });
             }
         }
     });
 });
 
+<<<<<<< HEAD
 // Delete user
 app.delete('/:id', [mdAuthenticattion.verificarToken, mdAuthenticattion.verificarRoleUser], (req, res) => {
+=======
+// DELETE USER
+app.delete('/:id', (req, res, next ) => {
+
+>>>>>>> 661bc162e9731e37e606fb54686b24ec2c48ccbb
     var id = req.params.id;
 
-    User.findByIdAndRemove(id, (err, userDelete) => {
-        if (err) {
+    var params = `${id}`;  
+    var lsql = `EXEC DELETE_USER ${params}`    
+
+    var request = new mssql.Request();
+    request.query(lsql, (err, result) => {
+        if (err) { 
             return res.status(500).send({
                 ok: false,
                 message: 'Error en la petición.',
                 error: err
             });
-        } else {
-            if (!userDelete) {
-                return res.status(404).send({
-                    ok: false,
-                    message: 'Usuario no Existe.'
-                });
-            } else {
-                res.status(200).send({
-                    ok: true,
-                    message: 'Usuario Eliminado Correctamente.',
-                    user: userDelete
-                });
-            }       
+        } else {   
+            var userDeleted = result.recordset;        
+            return res.status(200).send({
+                ok: true, 
+                message: userDeleted[0].MESSAGE,
+                userDeleted: userDeleted
+            });
         }
-
     });
 });
 

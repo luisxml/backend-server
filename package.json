@@ -1,16 +1,17 @@
 {
-  "name": "backend-server",
+  "name": "backend-servakr",
   "version": "1.0.0",
-  "description": "servidor adminPro\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[Dbackend\u001b[3~\u001b[ adminPro",
+  "description": "servidor servalApp\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[Dbackend\u001b[3~\u001b[ servalApp",
   "main": "index.js",
   "scripts": {
     "start": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Luis Galicia",
+  "author": "Ing. Luis Galicia",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "body-parse": "^0.1.0",
     "body-parser": "^1.19.0",
     "ejs": "^3.0.1",
     "express": "^4.17.1",

@@ -13,7 +13,9 @@ var jwt = require('jsonwebtoken');
 
 var app = express();
 
-var User = require('../models/user');
+//var User = require('../models/user');
+
+var mdAuthenticattion = require('../middlewares/authenticated');
 
 var mdAuthenticattion = require('../middlewares/authenticated');
 
