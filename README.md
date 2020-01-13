@@ -1,11 +1,9 @@
-# BakcEnd-Server 
-Este codigo es el backend de AdminPro conectado con mongoDB usando Mongoose.
+# BakcEnd-ServalApp 
+Este codigo es el backend de ServalApp conectado con Sql Server usando msslq.
 
-Para ejecutarlo es necesario recostrui los modulos de node usando el comanado:
+Para ejecutarlo es necesario reconstruir los modulos de node usando el comanado:
 
 ***********
 npm install
 ***********
 
-## Dentro de la carpeta logingoogle
-Existe una demostración para probar la autenticación de Google en un Front-End basico funcional.
